@@ -84,7 +84,8 @@ class ViewController: UIViewController {
             mapView.addAnnotation(annotation)
             
         let location = (place.geometry?.location!.coordinate)!
-        let region = MKCoordinateRegion(center: location, latitudinalMeters: 1000, longitudinalMeters: 1000) // adjust the region to your desired zoom level
+        let span = MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+        let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude), span: span) // adjust the region to your desired zoom level
         DispatchQueue.main.async {
             self.mapView.setRegion(region, animated: true)
         }
@@ -102,10 +103,9 @@ class ViewController: UIViewController {
         directions.calculate{response, error in
             guard let directionsResponse = response else {return}
             for route in directionsResponse.routes  {
-                print(route.name)
                 DispatchQueue.main.async {
                     self.mapView.addOverlay(route.polyline)
-                    self.mapView.setVisibleMapRect(route.polyline.boundingMapRect, animated: true)
+//                    self.mapView.setVisibleMapRect(route.polyline.boundingMapRect, animated: true)
                 }
             }
         }
@@ -146,9 +146,6 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
-        
-        
-        
         if CLLocationManager.locationServicesEnabled(){
 
             locationManager.desiredAccuracy = kCLLocationAccuracyBest
@@ -170,11 +167,7 @@ class ViewController: UIViewController {
             mapView.delegate = self;
             mapView.overrideUserInterfaceStyle = .dark
             locationManager.delegate = self
-            
             mapView.showsUserLocation = true
-            let region = MKCoordinateRegion(center: mapView.userLocation.coordinate, latitudinalMeters: 1000, longitudinalMeters: 1000)
-            mapView.setRegion(region, animated: true)
-//            findRestaurantsNear(location: mapView.userLocation, region: region)
             self.checkLocationAuthorization()
         }
         
@@ -185,11 +178,8 @@ class ViewController: UIViewController {
         super.viewDidAppear(animated)
     }
     @IBAction func buttonPressDown(_ sender: Any) {
-        let region = MKCoordinateRegion(center: mapView.userLocation.coordinate, latitudinalMeters: 1000, longitudinalMeters: 1000)
-        mapView.setRegion(region, animated: true)
         print("finding rest")
         self.findRandomRestaurant()
-//        self.findRestaurantsNear(location: mapView.userLocation, region: region)
     }
     
     func checkLocationAuthorization(authorizationStatus: CLAuthorizationStatus? = nil) {
@@ -211,7 +201,8 @@ class ViewController: UIViewController {
 extension ViewController: MKMapViewDelegate, CLLocationManagerDelegate {
 
     func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
-        let region = MKCoordinateRegion(center: userLocation.coordinate, latitudinalMeters: 200, longitudinalMeters: 200)
+        let span = MKCoordinateSpan(latitudeDelta: 1.0, longitudeDelta: 1.0)
+        let region = MKCoordinateRegion(center: userLocation.coordinate, span: span)
         mapView.setRegion(region, animated: true)
     }
 
@@ -221,12 +212,11 @@ extension ViewController: MKMapViewDelegate, CLLocationManagerDelegate {
     
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
         let renderer = MKPolylineRenderer(polyline: overlay as! MKPolyline)
-        renderer.strokeColor = .blue
-        renderer.lineWidth = 4.0
+        renderer.strokeColor = UIColor(red: 0.00, green: 0.78, blue: 0.33, alpha: 1.00)
+        renderer.lineWidth = 6.0
         renderer.alpha =  1.0
         return renderer
     }
-
 }
 
 // Models for JSON decoding
