@@ -166,9 +166,11 @@ class ViewController: UIViewController {
         if(authorizationStatus == .authorizedWhenInUse){
             mapView.delegate = self;
             mapView.overrideUserInterfaceStyle = .dark
+            mapView.frame = self.view.bounds
             locationManager.delegate = self
             mapView.showsUserLocation = true
             self.checkLocationAuthorization()
+            feedButton.center.x = self.view.center.x
         }
         
     }
@@ -201,9 +203,10 @@ class ViewController: UIViewController {
 extension ViewController: MKMapViewDelegate, CLLocationManagerDelegate {
 
     func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
-        let span = MKCoordinateSpan(latitudeDelta: 1.0, longitudeDelta: 1.0)
-        let region = MKCoordinateRegion(center: userLocation.coordinate, span: span)
-        mapView.setRegion(region, animated: true)
+//        let span = MKCoordinateSpan(latitudeDelta: 1.0, longitudeDelta: 1.0)
+//        let region = MKCoordinateRegion(center: userLocation.coordinate, span: span)
+//        mapView.frame = self.view.bounds
+//        mapView.setRegion(region, animated: true)
     }
 
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
