@@ -17,6 +17,8 @@ class ViewController: UIViewController {
     var locationManager = CLLocationManager()
     let apiKey = "AIzaSyDjWDkehgCmiI35ytkHYtehRc0l6wKu-YM"
     var places: [Place] = []
+    var currentOverLay: MKOverlay!
+    var currentAnnotation: MKAnnotation!
     
     func findRandomRestaurant() {
         let location = mapView.userLocation.coordinate // San Francisco coordinates, you can change this to any location
@@ -73,15 +75,18 @@ class ViewController: UIViewController {
         }
     
     func displayRandomPlaceOnMap() {
-            let randomIndex = Int.random(in: 0..<places.count)
-            let place = places[randomIndex]
-            print()
-            print(place)
-            let annotation = MKPointAnnotation()
-        annotation.coordinate = (place.geometry?.location!.coordinate)!
-            annotation.title = place.name
-            
-            mapView.addAnnotation(annotation)
+        let randomIndex = Int.random(in: 0..<places.count)
+        let place = places[randomIndex]
+        print()
+        print(place)
+        let annotation = MKPointAnnotation()
+    annotation.coordinate = (place.geometry?.location!.coordinate)!
+        annotation.title = place.name
+        
+        mapView.addAnnotation(annotation)
+        
+        currentAnnotation = annotation
+        
             
         let location = (place.geometry?.location!.coordinate)!
         let span = MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
@@ -105,6 +110,7 @@ class ViewController: UIViewController {
             for route in directionsResponse.routes  {
                 DispatchQueue.main.async {
                     self.mapView.addOverlay(route.polyline)
+                    self.currentOverLay = route.polyline
 //                    self.mapView.setVisibleMapRect(route.polyline.boundingMapRect, animated: true)
                 }
             }
@@ -146,6 +152,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        self.locationManager.delegate = self
         if CLLocationManager.locationServicesEnabled(){
 
             locationManager.desiredAccuracy = kCLLocationAccuracyBest
@@ -181,6 +188,13 @@ class ViewController: UIViewController {
     }
     @IBAction func buttonPressDown(_ sender: Any) {
         print("finding rest")
+        if(self.currentOverLay != nil) {
+            mapView.removeOverlay(self.currentOverLay)
+        }
+        if(self.currentAnnotation != nil) {
+            mapView.removeAnnotation(self.currentAnnotation)
+        }
+        
         self.findRandomRestaurant()
     }
     
@@ -200,13 +214,17 @@ class ViewController: UIViewController {
         }
 }
 
-extension ViewController: MKMapViewDelegate, CLLocationManagerDelegate {
+private var oneTime = false
 
+extension ViewController: MKMapViewDelegate, CLLocationManagerDelegate {
     func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
-//        let span = MKCoordinateSpan(latitudeDelta: 1.0, longitudeDelta: 1.0)
-//        let region = MKCoordinateRegion(center: userLocation.coordinate, span: span)
-//        mapView.frame = self.view.bounds
-//        mapView.setRegion(region, animated: true)
+        if(!oneTime){
+            let span = MKCoordinateSpan(latitudeDelta: 1.0, longitudeDelta: 1.0)
+            let region = MKCoordinateRegion(center: userLocation.coordinate, span: span)
+            mapView.frame = self.view.bounds
+            mapView.setRegion(region, animated: true)
+            oneTime = true
+        }
     }
 
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
