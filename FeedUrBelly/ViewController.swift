@@ -153,10 +153,11 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         self.locationManager.delegate = self
+        let currentVal = slider.value
+        minimumLabel.text = "\(slider.minimumValue)"
+        maximumLabel.text = "\(currentVal)"
         if CLLocationManager.locationServicesEnabled(){
-
             locationManager.desiredAccuracy = kCLLocationAccuracyBest
-          
        }else{
             print ("Err GPS")
        }
@@ -181,7 +182,14 @@ class ViewController: UIViewController {
         }
         
     }
-    
+    @IBOutlet weak var slider: UISlider!
+    @IBOutlet weak var minimumLabel: UILabel!
+    @IBOutlet weak var maximumLabel: UILabel!
+    @IBAction func sliderValueChanged(_ sender: UISlider) {
+        let currentVal = sender.value
+        minimumLabel.text = "\(slider.minimumValue)"
+        maximumLabel.text = "\(currentVal)"
+    }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
