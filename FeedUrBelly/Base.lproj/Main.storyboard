@@ -35,7 +35,10 @@
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" showsMenuAsPrimaryAction="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" changesSelectionAsPrimaryAction="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Guj-G0-f5I">
                                 <rect key="frame" x="16" y="47" width="41" height="30"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <accessibility key="accessibilityConfiguration" hint="Filters" label="Filters"/>
+                                <accessibility key="accessibilityConfiguration" hint="Filters" label="Filters">
+                                    <accessibilityTraits key="traits" button="YES" notEnabled="YES"/>
+                                    <bool key="isElement" value="YES"/>
+                                </accessibility>
                                 <menu key="menu" id="RuV-5p-oLg">
                                     <children>
                                         <command title="Item 1" id="ndZ-x8-z8b"/>

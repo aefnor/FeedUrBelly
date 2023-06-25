@@ -10,69 +10,90 @@ import MapKit
 import CoreLocation
 import Foundation
 
+// Global Vars
+private var oneTime = false
+
 class ViewController: UIViewController {
 
+    // UI Dec
     @IBOutlet weak var feedButton: UIButton!
     @IBOutlet weak var mapView: MKMapView!
+    @IBOutlet weak var slider: UISlider!
+    @IBOutlet weak var minimumLabel: UILabel!
+    @IBOutlet weak var maximumLabel: UILabel!
+
     var locationManager = CLLocationManager()
     let apiKey = "AIzaSyDjWDkehgCmiI35ytkHYtehRc0l6wKu-YM"
     var places: [Place] = []
     var currentOverLay: MKOverlay!
     var currentAnnotation: MKAnnotation!
+
+    // UI Controls
+    @IBAction func sliderValueChanged(_ sender: UISlider) {
+        let currentVal = sender.value
+        minimumLabel.text = "\(slider.minimumValue)"
+        maximumLabel.text = "\(currentVal)"
+    }
+
+    @IBAction func buttonPressDown(_ sender: Any) {
+        print("finding rest")
+        if(self.currentOverLay != nil) {
+            mapView.removeOverlay(self.currentOverLay)
+        }
+        if(self.currentAnnotation != nil) {
+            mapView.removeAnnotation(self.currentAnnotation)
+        }
+        
+        self.findRandomRestaurant()
+    }
     
     func findRandomRestaurant() {
         let location = mapView.userLocation.coordinate // San Francisco coordinates, you can change this to any location
             
-            let radius = 10000 // 10km radius
-            
-            let types = "restaurant"
-            
-            let urlString = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=\(location.latitude),\(location.longitude)&radius=\(radius)&types=\(types)&key=\(apiKey)"
-            
-            guard let url = URL(string: urlString) else {
-                print("Invalid URL")
+        let radius = 10000 // 10km radius
+        
+        let types = "restaurant"
+        
+        let urlString = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=\(location.latitude),\(location.longitude)&radius=\(radius)&types=\(types)&key=\(apiKey)"
+        
+        guard let url = URL(string: urlString) else {
+            print("Invalid URL")
+            return
+        }
+        
+        let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
+            guard let data = data else {
+                print("Error fetching data: \(error?.localizedDescription ?? "Unknown error")")
                 return
             }
-            
-            let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
-                guard let data = data else {
-                    print("Error fetching data: \(error?.localizedDescription ?? "Unknown error")")
-                    return
-                }
-//                print(data)
-                do {
-                    let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
-                    print(json)
-                    if let results = json?["results"] as? [[String: Any]], let randomResult = results.randomElement() {
-//                        print(randomResult)
-                        do {
-                            let decoder = JSONDecoder()
-                            let decoded = try decoder.decode(Result.self, from: data)
-                            print(decoded)
-                            self.places = decoded.results!
-                            self.displayRandomPlaceOnMap()
-                        } catch {
-                            // print(error.localizedDescription) // <- ⚠️ Don't use this!
+            do {
+                let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+                print(json)
+                if let results = json?["results"] as? [[String: Any]], let randomResult = results.randomElement() {
+                    do {
+                        let decoder = JSONDecoder()
+                        let decoded = try decoder.decode(Result.self, from: data)
+                        print(decoded)
+                        self.places = decoded.results!
+                        self.displayRandomPlaceOnMap()
+                    } catch {
 
-                            print(String(describing: error)) // <- ✅ Use this for debuging!
-                        }
-                        print(data)
-//                        let decoder = JSONDecoder()
-//                        let place = try decoder.decode([String: Result].self, from: data)
-                        let name = randomResult["name"] as? String ?? "Unknown"
-                        let vicinity = randomResult["vicinity"] as? String ?? "Unknown"
-                        print("Random restaurant: \(name), \(vicinity)")
-//                        print(place)
-                    } else {
-                        print("No restaurants found")
+                        print(String(describing: error)) // <- ✅ Use this for debuging!
                     }
-                } catch {
-                    print("Error parsing JSON: \(error.localizedDescription)")
+                    print(data)
+                    let name = randomResult["name"] as? String ?? "Unknown"
+                    let vicinity = randomResult["vicinity"] as? String ?? "Unknown"
+                    print("Random restaurant: \(name), \(vicinity)")
+                } else {
+                    print("No restaurants found")
                 }
+            } catch {
+                print("Error parsing JSON: \(error.localizedDescription)")
             }
-            
-            task.resume()
         }
+        
+        task.resume()
+    }
     
     func displayRandomPlaceOnMap() {
         let randomIndex = Int.random(in: 0..<places.count)
@@ -80,7 +101,7 @@ class ViewController: UIViewController {
         print()
         print(place)
         let annotation = MKPointAnnotation()
-    annotation.coordinate = (place.geometry?.location!.coordinate)!
+        annotation.coordinate = (place.geometry?.location!.coordinate)!
         annotation.title = place.name
         
         mapView.addAnnotation(annotation)
@@ -111,7 +132,6 @@ class ViewController: UIViewController {
                 DispatchQueue.main.async {
                     self.mapView.addOverlay(route.polyline)
                     self.currentOverLay = route.polyline
-//                    self.mapView.setVisibleMapRect(route.polyline.boundingMapRect, animated: true)
                 }
             }
         }
@@ -147,7 +167,6 @@ class ViewController: UIViewController {
             })
         
     }
-
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -182,28 +201,9 @@ class ViewController: UIViewController {
         }
         
     }
-    @IBOutlet weak var slider: UISlider!
-    @IBOutlet weak var minimumLabel: UILabel!
-    @IBOutlet weak var maximumLabel: UILabel!
-    @IBAction func sliderValueChanged(_ sender: UISlider) {
-        let currentVal = sender.value
-        minimumLabel.text = "\(slider.minimumValue)"
-        maximumLabel.text = "\(currentVal)"
-    }
-    
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-    }
-    @IBAction func buttonPressDown(_ sender: Any) {
-        print("finding rest")
-        if(self.currentOverLay != nil) {
-            mapView.removeOverlay(self.currentOverLay)
-        }
-        if(self.currentAnnotation != nil) {
-            mapView.removeAnnotation(self.currentAnnotation)
-        }
-        
-        self.findRandomRestaurant()
     }
     
     func checkLocationAuthorization(authorizationStatus: CLAuthorizationStatus? = nil) {
@@ -221,9 +221,7 @@ class ViewController: UIViewController {
             }
         }
 }
-
-private var oneTime = false
-
+// Extension Functions
 extension ViewController: MKMapViewDelegate, CLLocationManagerDelegate {
     func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
         if(!oneTime){
