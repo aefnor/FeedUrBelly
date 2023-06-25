@@ -12,6 +12,7 @@ import Foundation
 
 // Global Vars
 private var oneTime = false
+private var currentVal = 5.0
 
 class ViewController: UIViewController {
 
@@ -30,7 +31,9 @@ class ViewController: UIViewController {
 
     // UI Controls
     @IBAction func sliderValueChanged(_ sender: UISlider) {
-        let currentVal = sender.value
+        currentVal = Double(sender.value)
+        animateCircle(coordinate: mapView.userLocation.coordinate, radius: 1609.34 * Double(currentVal)) // For example, 1 kilometer radius
+
         minimumLabel.text = "\(slider.minimumValue)"
         maximumLabel.text = "\(currentVal)"
     }
@@ -47,10 +50,37 @@ class ViewController: UIViewController {
         self.findRandomRestaurant()
     }
     
+    func animateCircle(coordinate: CLLocationCoordinate2D, radius: CLLocationDistance) {
+        let circleOverlays = mapView.overlays.filter { $0 is MKCircle }
+        mapView.removeOverlays(circleOverlays)
+        let circle = MKCircle(center: coordinate, radius: radius)
+        mapView.addOverlay(circle)
+
+        let animation = CABasicAnimation(keyPath: "transform.scale")
+        animation.duration = 1.0
+        animation.repeatCount = .infinity
+        animation.autoreverses = true
+        animation.fromValue = NSNumber(value: 1.0)
+        animation.toValue = NSNumber(value: 2.0)
+
+        mapView.overlays.forEach { overlay in
+            if overlay is MKCircle {
+                let circleRenderer = mapView.renderer(for: overlay) as! MKCircleRenderer
+                circleRenderer.alpha = 0.8
+                circleRenderer.lineWidth = 2.0
+                circleRenderer.strokeColor = UIColor.blue
+                circleRenderer.fillColor = UIColor.blue.withAlphaComponent(0.2)
+                // circleRenderer.layer.add(animation, forKey: "opacityAnimation")
+                // circleRenderer.overlay.shape.add(animation, forKey: "pulse")
+                // mapView.layer.add(animation, forKey: "pulse")
+            }
+        }
+    }
+
     func findRandomRestaurant() {
         let location = mapView.userLocation.coordinate // San Francisco coordinates, you can change this to any location
             
-        let radius = 10000 // 10km radius
+        let radius = 1609.34 * Double(currentVal) // 1mi in meters * currentVal aka more miles
         
         let types = "restaurant"
         
@@ -232,17 +262,33 @@ extension ViewController: MKMapViewDelegate, CLLocationManagerDelegate {
             oneTime = true
         }
     }
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if let location = locations.first {
+            // Call animateCircle with desired radius (in meters) and take the radius in miles and multiple that by the sliders value
+            animateCircle(coordinate: location.coordinate, radius: 1609.34 * Double(currentVal)) // For example, 1 kilometer radius
+        }
+    }
 
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         self.checkLocationAuthorization(authorizationStatus: status)
     }
     
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
-        let renderer = MKPolylineRenderer(polyline: overlay as! MKPolyline)
-        renderer.strokeColor = UIColor(red: 0.00, green: 0.78, blue: 0.33, alpha: 1.00)
-        renderer.lineWidth = 6.0
-        renderer.alpha =  1.0
-        return renderer
+        if overlay is MKCircle {
+            let renderer = MKCircleRenderer(overlay: overlay)
+            renderer.fillColor = UIColor.blue.withAlphaComponent(0.2)
+            renderer.strokeColor = UIColor.blue.withAlphaComponent(0.7)
+            renderer.lineWidth = 2.0
+            return renderer
+        }
+        if overlay is MKPolyline {
+            let renderer = MKPolylineRenderer(polyline: overlay as! MKPolyline)
+            renderer.strokeColor = UIColor(red: 0.00, green: 0.78, blue: 0.33, alpha: 1.00)
+            renderer.lineWidth = 6.0
+            renderer.alpha =  1.0
+            return renderer
+        }
+        return MKOverlayRenderer()
     }
 }
 
