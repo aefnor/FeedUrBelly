@@ -28,6 +28,7 @@ class ViewController: UIViewController {
     var places: [Place] = []
     var currentOverLay: MKOverlay!
     var currentAnnotation: MKAnnotation!
+    var isFirstLaunch = true
 
     // UI Controls
     @IBAction func sliderValueChanged(_ sender: UISlider) {
@@ -36,6 +37,7 @@ class ViewController: UIViewController {
 
         minimumLabel.text = "\(slider.minimumValue)"
         maximumLabel.text = "\(currentVal)"
+        isFirstLaunch = false
     }
 
     @IBAction func buttonPressDown(_ sender: Any) {
@@ -47,7 +49,15 @@ class ViewController: UIViewController {
             mapView.removeAnnotation(self.currentAnnotation)
         }
         
-        self.findRandomRestaurant()
+        if isFirstLaunch {
+            isFirstLaunch = false
+            fetchAllPlaces { [weak self] in
+            self?.displayRandomPlaceOnMap()
+            }
+        } else {
+            self.displayRandomPlaceOnMap()
+        }
+        
     }
     
     func animateCircle(coordinate: CLLocationCoordinate2D, radius: CLLocationDistance) {
@@ -77,6 +87,76 @@ class ViewController: UIViewController {
         }
     }
 
+    func fetchPlaces(withPageToken pageToken: String?, completion: @escaping () -> Void) {
+        // Set up the URL request
+        let location = mapView.userLocation.coordinate // San Francisco coordinates, you can change this to any location
+            
+        let radius = 1609.34 * Double(currentVal) // 1mi in meters * currentVal aka more miles
+        
+        let types = "restaurant"
+        
+        var urlString = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=\(location.latitude),\(location.longitude)&radius=\(radius)&types=\(types)&key=\(apiKey)"
+        // var urlString = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=37.7749,-122.4194&radius=1000&type=restaurant&key=YOUR_API_KEY"
+
+        if let token = pageToken {
+            urlString += "&pagetoken=\(token)"
+        }
+
+        guard let url = URL(string: urlString) else {
+            print("Invalid URL")
+            return
+        }
+
+        // Perform the API request
+        let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
+            if let error = error {
+                print("Error: \(error.localizedDescription)")
+                return
+            }
+
+            guard let data = data else {
+                print("No data received")
+                return
+            }
+
+            do {
+                let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+
+                // Parse the response JSON
+                if let results = json?["results"] as? [[String: Any]], let randomResult = results.randomElement() {
+                    do {
+                        let decoder = JSONDecoder()
+                        let decoded = try decoder.decode(Result.self, from: data)
+                        print(decoded)
+                        self.places = decoded.results!
+                    } catch {
+
+                        print(String(describing: error)) // <- ✅ Use this for debuging!
+                    }
+                    print(data)
+                    let name = randomResult["name"] as? String ?? "Unknown"
+                    let vicinity = randomResult["vicinity"] as? String ?? "Unknown"
+                    print("Random restaurant: \(name), \(vicinity)")
+                }
+
+                // Check if there is a next page token
+                if let nextPageToken = json?["next_page_token"] as? String {
+                    // Delay a bit before fetching the next page to allow for processing
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                        self.fetchPlaces(withPageToken: nextPageToken, completion: completion)
+                    }
+                } else {
+                    completion() // Call the completion handler when all results have been fetched
+                }
+
+            } catch {
+                print("JSON parsing error: \(error.localizedDescription)")
+            }
+        }
+
+        task.resume()
+    }
+
     func findRandomRestaurant() {
         let location = mapView.userLocation.coordinate // San Francisco coordinates, you can change this to any location
             
@@ -104,7 +184,7 @@ class ViewController: UIViewController {
                         let decoder = JSONDecoder()
                         let decoded = try decoder.decode(Result.self, from: data)
                         print(decoded)
-                        self.places = decoded.results!
+                        self.places = self.places + decoded.results!
                         self.displayRandomPlaceOnMap()
                     } catch {
 
@@ -194,6 +274,10 @@ class ViewController: UIViewController {
                }
             })
         
+    }
+    
+    func fetchAllPlaces(completion: @escaping () -> Void) {
+        fetchPlaces(withPageToken: nil, completion: completion)
     }
     
     override func viewDidLoad() {
