@@ -168,13 +168,11 @@ class ViewController: UIViewController {
     }
     
     func findRestaurantsNear(location: MKUserLocation, region: MKCoordinateRegion){
-        print("in")
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = "closest food to eat in Gilbert Arizona"
         request.region = MKCoordinateRegion(
             center: location.coordinate, latitudinalMeters: 5, longitudinalMeters: 5)
         let search = MKLocalSearch(request: request)
-        print(location.coordinate)
         
         search.start(completionHandler: {(response, error) in
                
