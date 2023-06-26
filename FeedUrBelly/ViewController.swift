@@ -29,6 +29,7 @@ class ViewController: UIViewController {
     var currentOverLay: MKOverlay!
     var currentAnnotation: MKAnnotation!
     var isFirstLaunch = true
+    var visitedPlaces: [Place] = []
 
     // UI Controls
     @IBAction func sliderValueChanged(_ sender: UISlider) {
@@ -50,15 +51,7 @@ class ViewController: UIViewController {
             mapView.removeAnnotations(mapView.annotations)
         }
         
-        if isFirstLaunch {
-            isFirstLaunch = false
-            fetchAllPlaces { [weak self] in
-            self?.displayRandomPlaceOnMap()
-            }
-        } else {
-            self.displayRandomPlaceOnMap()
-        }
-        
+        self.displayRandomPlaceOnMap()
     }
     
     func animateCircle(coordinate: CLLocationCoordinate2D, radius: CLLocationDistance) {
@@ -89,6 +82,7 @@ class ViewController: UIViewController {
     }
 
     func fetchPlaces(withPageToken pageToken: String?, completion: @escaping () -> Void) {
+        print("Fetching places")
         // Set up the URL request
         let location = mapView.userLocation.coordinate // San Francisco coordinates, you can change this to any location
             
@@ -122,6 +116,8 @@ class ViewController: UIViewController {
 
             do {
                 let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+                print(urlString)
+                print("JSON received", json)
 
                 // Parse the response JSON
                 if let results = json?["results"] as? [[String: Any]], let randomResult = results.randomElement() {
@@ -129,7 +125,7 @@ class ViewController: UIViewController {
                         let decoder = JSONDecoder()
                         let decoded = try decoder.decode(Result.self, from: data)
                         print(decoded)
-                        self.places = decoded.results!
+                        self.places = self.places + decoded.results!
                     } catch {
 
                         print(String(describing: error)) // <- ✅ Use this for debuging!
@@ -157,60 +153,21 @@ class ViewController: UIViewController {
 
         task.resume()
     }
-
-    func findRandomRestaurant() {
-        let location = mapView.userLocation.coordinate // San Francisco coordinates, you can change this to any location
-            
-        let radius = 1609.34 * Double(currentVal) // 1mi in meters * currentVal aka more miles
-        
-        let types = "restaurant"
-        
-        let urlString = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=\(location.latitude),\(location.longitude)&radius=\(radius)&types=\(types)&key=\(apiKey)"
-        
-        guard let url = URL(string: urlString) else {
-            print("Invalid URL")
-            return
-        }
-        
-        let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
-            guard let data = data else {
-                print("Error fetching data: \(error?.localizedDescription ?? "Unknown error")")
-                return
-            }
-            do {
-                let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
-                print(json)
-                if let results = json?["results"] as? [[String: Any]], let randomResult = results.randomElement() {
-                    do {
-                        let decoder = JSONDecoder()
-                        let decoded = try decoder.decode(Result.self, from: data)
-                        print(decoded)
-                        self.places = self.places + decoded.results!
-                        self.displayRandomPlaceOnMap()
-                    } catch {
-
-                        print(String(describing: error)) // <- ✅ Use this for debuging!
-                    }
-                    print(data)
-                    let name = randomResult["name"] as? String ?? "Unknown"
-                    let vicinity = randomResult["vicinity"] as? String ?? "Unknown"
-                    print("Random restaurant: \(name), \(vicinity)")
-                } else {
-                    print("No restaurants found")
-                }
-            } catch {
-                print("Error parsing JSON: \(error.localizedDescription)")
-            }
-        }
-        
-        task.resume()
-    }
     
     func displayRandomPlaceOnMap() {
+        // if places is empty, return
+        if places.isEmpty {
+            print("places is empty")
+            return
+        }
         let randomIndex = Int.random(in: 0..<places.count)
-        let place = places[randomIndex]
-        print()
-        print(place)
+        let place:Place = places[randomIndex]
+        if visitedPlaces.contains(where: { $0.name == place.name }) {
+            displayRandomPlaceOnMap()
+            return
+        }
+        visitedPlaces.append(place)
+        print(visitedPlaces)
         let annotation = MKPointAnnotation()
         annotation.coordinate = (place.geometry?.location!.coordinate)!
         annotation.title = place.name
@@ -303,6 +260,10 @@ class ViewController: UIViewController {
         } else {
             authorizationStatus = CLLocationManager.authorizationStatus()
         }
+        DispatchQueue.main.async {
+            self.feedButton.isEnabled = false
+        }
+
         if(authorizationStatus == .authorizedWhenInUse){
             mapView.delegate = self;
             mapView.overrideUserInterfaceStyle = .dark
@@ -317,6 +278,13 @@ class ViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        fetchAllPlaces { [weak self] in
+            // TODO: Allow them to press button after load
+            DispatchQueue.main.async {
+            // Enable the button once loading is complete
+                self?.feedButton.isEnabled = true
+            }
+        }
     }
     
     func checkLocationAuthorization(authorizationStatus: CLAuthorizationStatus? = nil) {

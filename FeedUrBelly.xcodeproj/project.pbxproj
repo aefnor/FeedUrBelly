@@ -443,6 +443,7 @@
 				INFOPLIST_FILE = FeedUrBelly/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Feed Ur Belly";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "So we can deilver you the best food locations!";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Feed Ur Belly would like to always use your location to provide you with the best experience.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Feed Ur Belly would like to use your location while in use to provide you with the best experience.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -480,6 +481,7 @@
 				INFOPLIST_FILE = FeedUrBelly/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Feed Ur Belly";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "So we can deilver you the best food locations!";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Feed Ur Belly would like to always use your location to provide you with the best experience.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Feed Ur Belly would like to use your location while in use to provide you with the best experience.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
