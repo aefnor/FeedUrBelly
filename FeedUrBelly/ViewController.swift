@@ -43,10 +43,11 @@ class ViewController: UIViewController {
     @IBAction func buttonPressDown(_ sender: Any) {
         print("finding rest")
         if(self.currentOverLay != nil) {
+            print(mapView.overlays)
             mapView.removeOverlay(self.currentOverLay)
         }
         if(self.currentAnnotation != nil) {
-            mapView.removeAnnotation(self.currentAnnotation)
+            mapView.removeAnnotations(mapView.annotations)
         }
         
         if isFirstLaunch {
