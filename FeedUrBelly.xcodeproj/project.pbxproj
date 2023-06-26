@@ -443,8 +443,8 @@
 				INFOPLIST_FILE = FeedUrBelly/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Feed Ur Belly";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
-				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "\"Feed Ur Belly would like to use your location.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "FUB would like to use your location while in use.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Feed Ur Belly would like to always use your location to provide you with the best experience.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Feed Ur Belly would like to use your location while in use to provide you with the best experience.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -480,8 +480,8 @@
 				INFOPLIST_FILE = FeedUrBelly/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Feed Ur Belly";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
-				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "\"Feed Ur Belly would like to use your location.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "FUB would like to use your location while in use.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Feed Ur Belly would like to always use your location to provide you with the best experience.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Feed Ur Belly would like to use your location while in use to provide you with the best experience.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
