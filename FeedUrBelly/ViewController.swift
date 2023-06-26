@@ -28,7 +28,6 @@ class ViewController: UIViewController {
     var places: [Place] = []
     var currentOverLay: MKOverlay!
     var currentAnnotation: MKAnnotation!
-    var isFirstLaunch = true
     var visitedPlaces: [Place] = []
 
     // UI Controls
@@ -36,9 +35,15 @@ class ViewController: UIViewController {
         currentVal = Double(sender.value)
         animateCircle(coordinate: mapView.userLocation.coordinate, radius: 1609.34 * Double(currentVal)) // For example, 1 kilometer radius
 
-        minimumLabel.text = "\(slider.minimumValue)"
-        maximumLabel.text = "\(currentVal)"
-        isFirstLaunch = false
+        minimumLabel.text = "\(Int(slider.minimumValue))"
+        maximumLabel.text = "\(Int(currentVal))"
+        fetchAllPlaces { [weak self] in
+            // TODO: Allow them to press button after load
+            DispatchQueue.main.async {
+            // Enable the button once loading is complete
+            self?.feedButton.isEnabled = true
+            }
+        }
     }
 
     @IBAction func buttonPressDown(_ sender: Any) {
@@ -113,32 +118,30 @@ class ViewController: UIViewController {
                 print("No data received")
                 return
             }
-
+            print("Data received", data)
             do {
                 let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
-                print(urlString)
-                print("JSON received", json)
+                // print(urlString)
+                // print("JSON received", json)
 
                 // Parse the response JSON
-                if let results = json?["results"] as? [[String: Any]], let randomResult = results.randomElement() {
+                if let results = json?["results"] as? [[String: Any]] {
                     do {
                         let decoder = JSONDecoder()
                         let decoded = try decoder.decode(Result.self, from: data)
-                        print(decoded)
+                        print("Adding Results!")
                         self.places = self.places + decoded.results!
                     } catch {
 
                         print(String(describing: error)) // <- ✅ Use this for debuging!
                     }
-                    print(data)
-                    let name = randomResult["name"] as? String ?? "Unknown"
-                    let vicinity = randomResult["vicinity"] as? String ?? "Unknown"
-                    print("Random restaurant: \(name), \(vicinity)")
                 }
 
                 // Check if there is a next page token
                 if let nextPageToken = json?["next_page_token"] as? String {
                     // Delay a bit before fetching the next page to allow for processing
+                    print("Getting next page", nextPageToken)
+                    print(self.places.count)
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                         self.fetchPlaces(withPageToken: nextPageToken, completion: completion)
                     }
@@ -158,6 +161,17 @@ class ViewController: UIViewController {
         // if places is empty, return
         if places.isEmpty {
             print("places is empty")
+            DispatchQueue.main.async {
+                self.feedButton.isEnabled = false
+            }
+            fetchAllPlaces { [weak self] in
+                // TODO: Allow them to press button after load
+                DispatchQueue.main.async {
+                // Enable the button once loading is complete
+                self?.feedButton.isEnabled = true
+                self?.displayRandomPlaceOnMap()
+                }
+            }
             return
         }
         let randomIndex = Int.random(in: 0..<places.count)
@@ -243,11 +257,11 @@ class ViewController: UIViewController {
         // Do any additional setup after loading the view.
         self.locationManager.delegate = self
         let currentVal = slider.value
-        minimumLabel.text = "\(slider.minimumValue)"
-        maximumLabel.text = "\(currentVal)"
+        minimumLabel.text = "\(Int(slider.minimumValue))"
+        maximumLabel.text = "\(Int(currentVal))"
         if CLLocationManager.locationServicesEnabled(){
             locationManager.desiredAccuracy = kCLLocationAccuracyBest
-       }else{
+       } else {
             print ("Err GPS")
        }
         locationManager.requestAlwaysAuthorization()
@@ -263,8 +277,8 @@ class ViewController: UIViewController {
         DispatchQueue.main.async {
             self.feedButton.isEnabled = false
         }
-
-        if(authorizationStatus == .authorizedWhenInUse){
+        // when we have any type of authorization, we can start using the map
+        if(authorizationStatus == .authorizedWhenInUse || authorizationStatus == .authorizedAlways || authorizationStatus == .authorized){
             mapView.delegate = self;
             mapView.overrideUserInterfaceStyle = .dark
             mapView.frame = self.view.bounds
