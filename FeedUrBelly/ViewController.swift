@@ -13,6 +13,50 @@ import Foundation
 // Global Vars
 private var oneTime = false
 private var currentVal = 5.0
+private var minimumPriceVal = 0.00
+private var maxmiumPriceVal = 0.00
+private var isOpenNow = false
+
+var filtersViewController: UIViewController?
+
+class ContentViewController: UIViewController {
+    @IBOutlet weak var minimumLabel: UITextField!
+    @IBOutlet weak var maximumLabel: UITextField!
+    @IBOutlet weak var mySwitch: UISwitch!
+    
+    @IBAction func dismissButtonPressed(_ sender: UIButton) {
+        dismissFiltersPopover()
+    }
+
+    @IBAction func opneNowChanged(_ sender: UISwitch) {
+        print("open now changed")
+        if sender.isOn {
+            isOpenNow = true
+        } else {
+            isOpenNow = false
+        }
+    }
+    @IBAction func minimumValueChanged(_ sender: UITextField) {
+        minimumPriceVal = Double(sender.text!) ?? 0.00
+    
+    }
+    @IBAction func maximumValueChanged(_ sender: UITextField) {
+        maxmiumPriceVal = Double(sender.text!) ?? 0.00
+    }
+    func dismissFiltersPopover() {
+        filtersViewController?.dismiss(animated: true, completion: nil)
+        filtersViewController = nil // Reset the property
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        print("ContentViewController loaded")
+        minimumLabel.text = "\(minimumPriceVal)"
+        maximumLabel.text = "\(maxmiumPriceVal)"
+        mySwitch.isOn = isOpenNow
+    }
+}
+
 
 class ViewController: UIViewController {
 
@@ -22,6 +66,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var slider: UISlider!
     @IBOutlet weak var minimumLabel: UILabel!
     @IBOutlet weak var maximumLabel: UILabel!
+    @IBOutlet weak var filterButton: UIButton!
 
     var locationManager = CLLocationManager()
     let apiKey = "AIzaSyDjWDkehgCmiI35ytkHYtehRc0l6wKu-YM"
@@ -35,8 +80,8 @@ class ViewController: UIViewController {
         currentVal = Double(sender.value)
         animateCircle(coordinate: mapView.userLocation.coordinate, radius: 1609.34 * Double(currentVal)) // For example, 1 kilometer radius
 
-        minimumLabel.text = "\(Int(slider.minimumValue))"
-        maximumLabel.text = "\(Int(currentVal))"
+        minimumLabel.text = "\(Int(slider.minimumValue))mi"
+        maximumLabel.text = "\(Int(currentVal))mi"
         fetchAllPlaces { [weak self] in
             // TODO: Allow them to press button after load
             DispatchQueue.main.async {
@@ -46,6 +91,18 @@ class ViewController: UIViewController {
         }
     }
 
+    @IBAction func filterButtonPressed(_ sender: UIButton) {
+        print("filter button pressed")
+        let contentViewController = storyboard?.instantiateViewController(withIdentifier: "ContentViewController") as! UIViewController
+
+        contentViewController.modalPresentationStyle = .popover
+        contentViewController.popoverPresentationController?.sourceView = sender
+        contentViewController.popoverPresentationController?.sourceRect = sender.bounds
+        contentViewController.popoverPresentationController?.permittedArrowDirections = .any
+
+        present(contentViewController, animated: true, completion: nil)
+        filtersViewController = contentViewController
+    }
     @IBAction func buttonPressDown(_ sender: Any) {
         print("finding rest")
         if(self.currentOverLay != nil) {
@@ -71,7 +128,7 @@ class ViewController: UIViewController {
         animation.autoreverses = true
         animation.fromValue = NSNumber(value: 1.0)
         animation.toValue = NSNumber(value: 2.0)
-
+// breaks on render
         mapView.overlays.forEach { overlay in
             if overlay is MKCircle {
                 let circleRenderer = mapView.renderer(for: overlay) as! MKCircleRenderer
@@ -101,6 +158,20 @@ class ViewController: UIViewController {
         if let token = pageToken {
             urlString += "&pagetoken=\(token)"
         }
+
+        if minimumPriceVal != 0.00 {
+            urlString += "&minprice=\(Int(minimumPriceVal))"
+        }
+
+        if maxmiumPriceVal != 0.00 {
+            urlString += "&maxprice=\(Int(maxmiumPriceVal))"
+        }
+
+        if isOpenNow {
+            urlString += "&opennow=true"
+        }
+
+        print(urlString)
 
         guard let url = URL(string: urlString) else {
             print("Invalid URL")
@@ -251,14 +322,28 @@ class ViewController: UIViewController {
     func fetchAllPlaces(completion: @escaping () -> Void) {
         fetchPlaces(withPageToken: nil, completion: completion)
     }
+    func setupFilterButton() {
+        let button = UIButton(type: .roundedRect)
+        button.frame = CGRect(x: 50, y: 50, width: 100, height: 40)
+        button.setTitle("Filters", for: .normal)
+
+        // Set corner radius to half of the button's height for a rounded appearance
+        button.layer.cornerRadius = button.frame.height / 2
+
+        // Set background color and text color
+        button.backgroundColor = UIColor.blue
+        button.setTitleColor(UIColor.white, for: .normal)
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        // setup filter button
+
         // Do any additional setup after loading the view.
         self.locationManager.delegate = self
         let currentVal = slider.value
-        minimumLabel.text = "\(Int(slider.minimumValue))"
-        maximumLabel.text = "\(Int(currentVal))"
+        minimumLabel.text = "\(Int(slider.minimumValue))mi"
+        maximumLabel.text = "\(Int(currentVal))mi"
         if CLLocationManager.locationServicesEnabled(){
             locationManager.desiredAccuracy = kCLLocationAccuracyBest
        } else {
