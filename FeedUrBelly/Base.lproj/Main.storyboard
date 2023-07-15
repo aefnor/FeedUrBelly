@@ -108,7 +108,7 @@
                                 <rect key="frame" x="16" y="142" width="147" height="34"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits"/>
+                                <textInputTraits key="textInputTraits" keyboardType="numberPad"/>
                                 <connections>
                                     <action selector="minimumValueChanged:" destination="QYW-4S-ixv" eventType="editingChanged" id="Wxk-2J-Hrt"/>
                                 </connections>
@@ -150,12 +150,26 @@
                                     <action selector="opneNowChanged:" destination="QYW-4S-ixv" eventType="valueChanged" id="Z97-5o-ir9"/>
                                 </connections>
                             </switch>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Keyword" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MhQ-SM-L31">
+                                <rect key="frame" x="266" y="201" width="66" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Sushi" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="KB8-Ii-Ifq">
+                                <rect key="frame" x="225" y="228" width="149" height="34"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="ddg-HU-4Hm"/>
                         <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <accessibility key="accessibilityConfiguration" identifier="ContentViewController"/>
                     </view>
                     <connections>
+                        <outlet property="keywordTextField" destination="KB8-Ii-Ifq" id="1Zt-Ye-GpW"/>
                         <outlet property="maximumLabel" destination="SXc-DV-EQq" id="2c4-qA-eQB"/>
                         <outlet property="minimumLabel" destination="mVL-JN-Pw6" id="dKd-7v-HDh"/>
                         <outlet property="mySwitch" destination="UaG-Kt-QGR" id="fN7-VI-hle"/>

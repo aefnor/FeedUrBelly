@@ -15,14 +15,48 @@ private var oneTime = false
 private var currentVal = 5.0
 private var minimumPriceVal = 0.00
 private var maxmiumPriceVal = 0.00
+private var keyword = ""
 private var isOpenNow = false
+private var filtersChanged: Bool = false
 
 var filtersViewController: UIViewController?
 
-class ContentViewController: UIViewController {
+class ContentViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDelegate, UITextFieldDelegate {
     @IBOutlet weak var minimumLabel: UITextField!
     @IBOutlet weak var maximumLabel: UITextField!
     @IBOutlet weak var mySwitch: UISwitch!
+    @IBOutlet weak var keywordTextField: UITextField!
+    let choices = ["", "Sushi", "Steakhouse", "Diner"]
+
+    // MARK: - UIPickerViewDataSource
+
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
+
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return choices.count
+    }
+
+    // MARK: - UIPickerViewDelegate
+
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return choices[row]
+    }
+
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        filtersChanged = true
+        keywordTextField.text = choices[row]
+        keyword = choices[row]
+    }
+
+    // MARK: - Helper method
+
+    func createPickerView() -> UIPickerView {
+        let pickerView = UIPickerView()
+        pickerView.delegate = self
+        return pickerView
+    }
     
     @IBAction func dismissButtonPressed(_ sender: UIButton) {
         dismissFiltersPopover()
@@ -30,6 +64,7 @@ class ContentViewController: UIViewController {
 
     @IBAction func opneNowChanged(_ sender: UISwitch) {
         print("open now changed")
+        filtersChanged = true
         if sender.isOn {
             isOpenNow = true
         } else {
@@ -37,10 +72,12 @@ class ContentViewController: UIViewController {
         }
     }
     @IBAction func minimumValueChanged(_ sender: UITextField) {
+        filtersChanged = true
         minimumPriceVal = Double(sender.text!) ?? 0.00
     
     }
     @IBAction func maximumValueChanged(_ sender: UITextField) {
+        filtersChanged = true
         maxmiumPriceVal = Double(sender.text!) ?? 0.00
     }
     func dismissFiltersPopover() {
@@ -54,6 +91,23 @@ class ContentViewController: UIViewController {
         minimumLabel.text = "\(minimumPriceVal)"
         maximumLabel.text = "\(maxmiumPriceVal)"
         mySwitch.isOn = isOpenNow
+        keywordTextField.delegate = self
+        keywordTextField.inputView = createPickerView()
+    }
+}
+
+extension ContentViewController {
+    func textFieldDidEndEditing(_ keywordTextField: UITextField) {
+        keywordTextField.resignFirstResponder()
+    }
+    
+    func textFieldShouldReturn(_ keywordTextField: UITextField) -> Bool {
+        keywordTextField.resignFirstResponder()
+        return true
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        self.view.endEditing(true)
     }
 }
 
@@ -171,7 +225,11 @@ class ViewController: UIViewController {
             urlString += "&opennow=true"
         }
 
-        print(urlString)
+        if keyword != "" {
+            urlString += "&keyword=\(keyword)"
+        }
+
+        print("URL STRING - " + urlString)
 
         guard let url = URL(string: urlString) else {
             print("Invalid URL")
@@ -230,7 +288,7 @@ class ViewController: UIViewController {
     
     func displayRandomPlaceOnMap() {
         // if places is empty, return
-        if places.isEmpty {
+        if places.isEmpty || filtersChanged {
             print("places is empty")
             DispatchQueue.main.async {
                 self.feedButton.isEnabled = false
@@ -238,9 +296,10 @@ class ViewController: UIViewController {
             fetchAllPlaces { [weak self] in
                 // TODO: Allow them to press button after load
                 DispatchQueue.main.async {
-                // Enable the button once loading is complete
-                self?.feedButton.isEnabled = true
-                self?.displayRandomPlaceOnMap()
+                    // Enable the button once loading is complete
+                    self?.feedButton.isEnabled = true
+                    filtersChanged = false
+                    self?.displayRandomPlaceOnMap()
                 }
             }
             return
