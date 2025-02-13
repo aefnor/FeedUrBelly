@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="retina6_0" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
         <capability name="Map view configurations" minToolsVersion="14.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -17,36 +18,37 @@
                         <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dX2-xv-QzB">
-                                <rect key="frame" x="0.0" y="0.0" width="430" height="932"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="dX2-xv-QzB">
+                                <rect key="frame" x="0.0" y="0.0" width="430" height="845"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="dX2-xv-QzB" secondAttribute="height" multiplier="86:169" id="lf2-WO-NHO"/>
+                                </constraints>
                                 <standardMapConfiguration key="preferredConfiguration"/>
                             </mapView>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="t8r-aZ-MVr">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="t8r-aZ-MVr">
                                 <rect key="frame" x="126" y="754" width="142" height="35"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="filled" title="Feed Your Belly" titleAlignment="center"/>
                                 <connections>
-                                    <action selector="buttonPressDown:" destination="BYZ-38-t0r" eventType="touchDown" id="AIY-0u-Um9"/>
+                                    <action selector="buttonPressDown:" destination="BYZ-38-t0r" eventType="touchDown" id="JIr-dP-dgm"/>
                                 </connections>
                             </button>
                             <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="5" minValue="0.0" maxValue="20" translatesAutoresizingMaskIntoConstraints="NO" id="Hfo-xY-X1E">
-                                <rect key="frame" x="275" y="57" width="94" height="30"/>
+                                <rect key="frame" x="275" y="47" width="94" height="31"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <connections>
                                     <action selector="sliderValueChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="BOw-M0-GED"/>
                                 </connections>
                             </slider>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="STE-c8-g0G">
-                                <rect key="frame" x="231" y="61" width="42" height="21"/>
+                                <rect key="frame" x="231" y="47" width="42" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="X51-kp-mZ1">
-                                <rect key="frame" x="370" y="61" width="42" height="21"/>
+                                <rect key="frame" x="370" y="47" width="42" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
@@ -66,6 +68,18 @@
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="dX2-xv-QzB" secondAttribute="trailing" id="FCD-ut-1ML"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="t8r-aZ-MVr" secondAttribute="trailing" constant="122" id="TPc-Cb-p4T"/>
+                            <constraint firstItem="dX2-xv-QzB" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="Uvu-B3-rRK"/>
+                            <constraint firstItem="t8r-aZ-MVr" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="126" id="feq-BN-NeC"/>
+                            <constraint firstItem="t8r-aZ-MVr" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="126" id="k4C-sa-TZh"/>
+                            <constraint firstItem="dX2-xv-QzB" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="ldq-n3-3pe"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="t8r-aZ-MVr" secondAttribute="bottom" constant="21" id="pmT-JO-aJn"/>
+                            <constraint firstAttribute="bottom" secondItem="dX2-xv-QzB" secondAttribute="bottom" id="qL6-gg-hxy"/>
+                            <constraint firstAttribute="trailing" secondItem="dX2-xv-QzB" secondAttribute="trailing" constant="-40" id="ypx-7E-gf7"/>
+                            <constraint firstAttribute="bottom" secondItem="dX2-xv-QzB" secondAttribute="bottom" constant="-1" id="zfU-eZ-cM9"/>
+                        </constraints>
                     </view>
                     <connections>
                         <outlet property="feedButton" destination="t8r-aZ-MVr" id="nAh-Li-chE"/>

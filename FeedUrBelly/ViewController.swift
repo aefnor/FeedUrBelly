@@ -171,30 +171,24 @@ class ViewController: UIViewController {
     }
     
     func animateCircle(coordinate: CLLocationCoordinate2D, radius: CLLocationDistance) {
+        // Remove existing circle overlays
         let circleOverlays = mapView.overlays.filter { $0 is MKCircle }
         mapView.removeOverlays(circleOverlays)
+        
+        // Add new circle overlay
         let circle = MKCircle(center: coordinate, radius: radius)
         mapView.addOverlay(circle)
 
+        // Create animation
         let animation = CABasicAnimation(keyPath: "transform.scale")
         animation.duration = 1.0
         animation.repeatCount = .infinity
         animation.autoreverses = true
         animation.fromValue = NSNumber(value: 1.0)
         animation.toValue = NSNumber(value: 2.0)
-// breaks on render
-        mapView.overlays.forEach { overlay in
-            if overlay is MKCircle {
-                let circleRenderer = mapView.renderer(for: overlay) as! MKCircleRenderer
-                circleRenderer.alpha = 0.8
-                circleRenderer.lineWidth = 2.0
-                circleRenderer.strokeColor = UIColor.blue
-                circleRenderer.fillColor = UIColor.blue.withAlphaComponent(0.2)
-                // circleRenderer.layer.add(animation, forKey: "opacityAnimation")
-                // circleRenderer.overlay.shape.add(animation, forKey: "pulse")
-                // mapView.layer.add(animation, forKey: "pulse")
-            }
-        }
+
+        // Remove the problematic forEach loop that was causing the crash
+        // The styling will be handled in the mapView(_:rendererFor:) delegate method
     }
 
     func fetchPlaces(withPageToken pageToken: String?, completion: @escaping () -> Void) {
